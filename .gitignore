@@ -1,0 +1,50 @@
+# Backup System - Git Ignore Rules
+
+# Sensitive configuration files
+*.conf
+*config*.txt
+*password*.txt
+*credential*.txt
+
+# Backup data directories (these should not be in version control)
+backup/
+backups/
+*.backup
+*.bak
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime files
+*.pid
+*.lock
+
+# OS generated files
+.directory
+
+# Archive and version files (cleaning up legacy naming)
+*_v*.sh
+*_v*.md
+_Archive/
+archive/
+Archive/
+
+# Test and development files
+test_*
+*_test.*
+dev_*
+*_dev.*
