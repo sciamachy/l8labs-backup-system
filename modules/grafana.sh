@@ -16,14 +16,14 @@ backup_grafana() {
     if podman cp grafana:/var/lib/grafana/. $backup_component_path/data/grafana_temp/; then
         # Compress the backup
         echo "Compressing Grafana data..."
-        tar -czf $backup_component_path/data/grafana_backup.tar.gz -C $backup_component_path/data/ grafana_temp
-        rm -rf $backup_component_path/data/grafana_temp
-        
-        # Calculate validation data
-        local backup_size=$(stat -c%s "$backup_component_path/data/grafana_backup.tar.gz")
-        local md5sum=$(md5sum "$backup_component_path/data/grafana_backup.tar.gz" | cut -d' ' -f1)
-        
-        validation=$(cat << EOJSON
+        if tar -czf $backup_component_path/data/grafana_backup.tar.gz -C $backup_component_path/data/ grafana_temp; then
+            rm -rf $backup_component_path/data/grafana_temp
+            
+            # Calculate validation data
+            local backup_size=$(stat -c%s "$backup_component_path/data/grafana_backup.tar.gz")
+            local md5sum=$(md5sum "$backup_component_path/data/grafana_backup.tar.gz" | cut -d' ' -f1)
+            
+            validation=$(cat << EOJSON
 {
     "size": $backup_size,
     "files": [
@@ -40,6 +40,10 @@ backup_grafana() {
 }
 EOJSON
 )
+        else
+            echo "ERROR: Failed to compress Grafana backup"
+            status="failed"
+        fi
     else
         echo "ERROR: Failed to copy Grafana data from container"
         status="failed"
