@@ -54,7 +54,9 @@ The Modular Backup System provides consistent backups across multiple server typ
     ├── grafana.sh         # Grafana backups
     ├── prometheus.sh      # Prometheus backups
     ├── openhab.sh         # OpenHAB backups
-    └── ...                # Additional service modules
+    ├── proxmox-pve.sh     # Proxmox VE config backups
+    ├── proxmox-network.sh # Proxmox network config backups
+    └── zigbee2mqtt.sh     # Zigbee2MQTT backups
 ```
 
 ## Current Modules
@@ -63,7 +65,6 @@ The Modular Backup System provides consistent backups across multiple server typ
 - **grafana.sh** - Grafana configuration and dashboard backups
 - **prometheus.sh** - Prometheus data and configuration backups
 - **openhab.sh** - OpenHAB home automation system backups
-- **svn.sh** - Subversion repository backups
 - **proxmox-pve.sh** - Proxmox VE configuration backups
 - **proxmox-network.sh** - Proxmox network configuration backups
 - **zigbee2mqtt.sh** - Zigbee2MQTT configuration backups
@@ -113,6 +114,8 @@ Internal L8Labs system - Not for external distribution.
 
 ---
 
-**Current Version:** 3.0.0  
-**Last Updated:** 2025-09-24  
+**Current Version:** 3.0.0
+**Last Updated:** 2026-02-28
 **Maintained by:** L8Labs Infrastructure Team
+
+> **Note:** The Windows desktop (advantage) uses a separate [restic-based backup](https://github.com/sciamachy/l8labs-monitoring-stack) approach rather than this bash framework. Both systems write the same `host_status.json` format for unified monitoring via backup-exporter.
