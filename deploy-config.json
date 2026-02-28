@@ -1,0 +1,55 @@
+{
+    "ssh_key": "~/.ssh/claude_mcp_ed25519",
+    "hosts": {
+        "podman-srv1": {
+            "fqdn": "podman-srv1.is.l8labs.ca",
+            "ssh_user": "root",
+            "script_path": "/root/scripts/podman-backup.sh",
+            "needs_sudo": false,
+            "modules": [
+                "grafana",
+                "prometheus"
+            ],
+            "dummy_modules": [
+                "backup-exporter",
+                "calibre-web",
+                "media-library-manager",
+                "node-exporter",
+                "ontario-parks-app",
+                "server-upgrade-tracker",
+                "snmp_exporter",
+                "traefik"
+            ]
+        },
+        "podman-db1": {
+            "fqdn": "podman-db1.is.l8labs.ca",
+            "ssh_user": "harrisc",
+            "script_path": "/root/scripts/podman-backup.sh",
+            "needs_sudo": true,
+            "modules": [
+                "influxdb",
+                "mariadb"
+            ]
+        },
+        "bas1": {
+            "fqdn": "bas1.bas.l8labs.ca",
+            "ssh_user": "harrisc",
+            "script_path": "/root/scripts/backup.sh",
+            "needs_sudo": true,
+            "modules": [
+                "openhab",
+                "zigbee2mqtt"
+            ]
+        },
+        "prox1": {
+            "fqdn": "prox1.is.l8labs.ca",
+            "ssh_user": "root",
+            "script_path": "/root/scripts/proxmox-config-backup.sh",
+            "needs_sudo": false,
+            "modules": [
+                "network",
+                "pve"
+            ]
+        }
+    }
+}

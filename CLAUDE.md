@@ -25,14 +25,14 @@ The companion monitoring stack lives at `C:\Users\da_bi\Claude_Workspace\l8labs-
 
 The module **filename** determines the function name the orchestrator calls. A file named `foo.sh` must define `backup_foo()`. If these don't match, the module silently falls back to config-only backup.
 
-**Current issue:** The repo files `proxmox-pve.sh` and `proxmox-network.sh` define `backup_pve()` and `backup_network()` respectively. Their in-file comments show the original deployed names were `pve.sh` and `network.sh`. When deploying, either rename the files back or rename the functions to `backup_proxmox-pve` / `backup_proxmox-network`.
+The repo files `pve.sh` and `network.sh` match their deployed names on prox1 and define `backup_pve()` and `backup_network()` respectively.
 
 ### Module patterns
 
 Modules fall into three categories:
 - **Container-based** (mariadb, grafana, prometheus): use `podman exec` or `podman cp` to extract data from running containers
 - **Filesystem-based** (openhab, zigbee2mqtt, proxmox-*): tar/copy files directly from the host
-- **Config-only** (dummy modules): no `backup_*` function; the orchestrator auto-copies from `/etc/containers/<name>` and `/etc/<name>`
+- **Config-only** (dummy modules): no `backup_*` function; the orchestrator auto-copies from `/etc/containers/<name>` and `/etc/<name>`. A single `modules/dummy.sh` template is used for all dummy modules; `deploy-config.json` lists them per host under `dummy_modules`
 
 All modules produce a validation JSON with `size`, `files` (array of path/size/md5), and `checks`.
 
@@ -42,17 +42,18 @@ This JSON file at `/mnt/backup/host_status.json` is consumed by the monitoring s
 
 ## Deployment
 
-There is no automated deployment. Files are manually copied to target servers:
+Use `deploy-backup.py` to deploy the orchestrator script and modules to hosts:
 ```bash
-# Main script
-cp backup.sh /root/scripts/backup.sh
-
-# Modules
-cp modules/*.sh /root/scripts/backup-modules/
-chmod +x /root/scripts/backup.sh /root/scripts/backup-modules/*.sh
+python deploy-backup.py                    # all hosts, script + modules
+python deploy-backup.py podman-srv1        # single host
+python deploy-backup.py --script-only      # orchestrator only, skip modules
+python deploy-backup.py --modules-only     # modules only, skip orchestrator
+python deploy-backup.py --dry-run          # preview without changes
 ```
 
-Runs via cron at 1 AM daily. Requires `jq` and Bash 4+. See `backup-deployment-tracking.md` for per-server version status.
+Host configuration (SSH access, script paths, module assignments) lives in `deploy-config.json`. The `modules` list contains real modules with custom backup logic; `dummy_modules` are config-only modules deployed from the shared `modules/dummy.sh` template.
+
+Backups run via cron at 1 AM daily. Requires `jq` and Bash 4+. See `backup-deployment-tracking.md` for per-server version status.
 
 ## Selective module control
 
@@ -68,4 +69,4 @@ If `/etc/backup-modules.conf` exists on a target host, only modules listed there
 
 ## Security note
 
-The mariadb module contains hardcoded database credentials. These should eventually be moved to a separate config file excluded from version control.
+The mariadb and influxdb modules contain hardcoded credentials/tokens. These should eventually be moved to a separate config file excluded from version control.

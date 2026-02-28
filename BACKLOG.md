@@ -4,45 +4,31 @@ This document tracks technical debt, future features, and known issues that aren
 
 ## Technical Debt
 
-### Hardcoded database credentials in mariadb module
+### Hardcoded credentials in backup modules
 **Added:** 2026-02-28
 **Status:** Ready to implement
 
-The `modules/mariadb.sh` file contains hardcoded `DB_USER` and `DB_PASS` values in plain text.
+`modules/mariadb.sh` contains hardcoded `DB_USER` and `DB_PASS` values. `modules/influxdb.sh` contains a hardcoded `INFLUXDB_TOKEN`.
 
-**Context:** Credentials were embedded directly in the script for simplicity during initial development.
+**Context:** Credentials were embedded directly in the scripts for simplicity during initial development.
 
 **Action:** Move credentials to a separate config file (e.g., `/etc/backup-credentials.conf`) that is excluded from version control. Source it at runtime.
 
-**Reference:** `modules/mariadb.sh:6-7`
-
----
-
-### Module filename/function name mismatch
-**Added:** 2026-02-28
-**Status:** Ready to implement
-
-`proxmox-pve.sh` defines `backup_pve()` and `proxmox-network.sh` defines `backup_network()`. The orchestrator derives the expected function name from the filename, so it looks for `backup_proxmox-pve()` and `backup_proxmox-network()`, which don't exist. These modules silently fall back to config-only backup on deployment.
-
-**Context:** The files were originally named `pve.sh` and `network.sh` (per their in-file comments) and were renamed in the repo without updating the function names.
-
-**Action:** Either rename files back to `pve.sh`/`network.sh`, or rename the functions to `backup_proxmox-pve()`/`backup_proxmox-network()`. Also update the in-file path comments.
-
-**Reference:** `modules/proxmox-pve.sh:4`, `modules/proxmox-network.sh:4`, `backup.sh:274`
+**Reference:** `modules/mariadb.sh:6-7`, `modules/influxdb.sh:5`
 
 ---
 
 ### Deployment tracking shows hosts on v2.0.0
 **Added:** 2026-02-28
-**Status:** Needs investigation
+**Status:** Ready to implement
 
-Three hosts (`bas1`, `podman-db1`, `podman-srv1`) are still on v2.0.0 per `backup-deployment-tracking.md`. The v3 upgrade plan has no scheduled dates.
+Three hosts (`bas1`, `podman-db1`, `podman-srv1`) are still on v2.0.0 per `backup-deployment-tracking.md`. The v3 upgrade plan has no scheduled dates. Deploy script (`deploy-backup.py`) is now available.
 
 **Context:** v3.0.0 added automatic mount point validation which fixes boot-time mount issues that `podman-srv1` has experienced.
 
-**Action:** Schedule and execute v3 upgrades, prioritizing `podman-srv1`.
+**Action:** Run `python deploy-backup.py` to deploy v3 to all three hosts. Update `backup-deployment-tracking.md` after.
 
-**Reference:** `backup-deployment-tracking.md`
+**Reference:** `backup-deployment-tracking.md`, `deploy-backup.py`
 
 ---
 
@@ -112,7 +98,13 @@ The `--newer-mtime "1 day ago"` flag in `modules/openhab.sh` can produce empty t
 
 ## Resolved Items
 
-*Move completed backlog items here with resolution date and notes*
+### Module filename/function name mismatch
+**Added:** 2026-02-28
+**Resolved:** 2026-02-28
+
+Repo files `proxmox-pve.sh` and `proxmox-network.sh` didn't match their function names `backup_pve()` and `backup_network()`.
+
+**Resolution:** Renamed repo files back to `pve.sh` and `network.sh` to match what's deployed on prox1 and the function names.
 
 ---
 
