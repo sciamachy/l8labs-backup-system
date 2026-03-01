@@ -18,20 +18,6 @@ This document tracks technical debt, future features, and known issues that aren
 
 ---
 
-### Deployment tracking shows hosts on v2.0.0
-**Added:** 2026-02-28
-**Status:** Ready to implement
-
-Three hosts (`bas1`, `podman-db1`, `podman-srv1`) are still on v2.0.0 per `backup-deployment-tracking.md`. The v3 upgrade plan has no scheduled dates. Deploy script (`deploy-backup.py`) is now available.
-
-**Context:** v3.0.0 added automatic mount point validation which fixes boot-time mount issues that `podman-srv1` has experienced.
-
-**Action:** Run `python deploy-backup.py` to deploy v3 to all three hosts. Update `backup-deployment-tracking.md` after.
-
-**Reference:** `backup-deployment-tracking.md`, `deploy-backup.py`
-
----
-
 ## Future Features
 
 ### Selective module enablement via command-line arguments
@@ -97,6 +83,16 @@ The `--newer-mtime "1 day ago"` flag in `modules/openhab.sh` can produce empty t
 ---
 
 ## Resolved Items
+
+### All Linux hosts upgraded to v3.0.0
+**Added:** 2026-02-28
+**Resolved:** 2026-03-01
+
+Three hosts (`bas1`, `podman-db1`, `podman-srv1`) were on v2.0.0 and vulnerable to silent backup failures when CIFS mounts drop.
+
+**Resolution:** Deployed v3 to all hosts via `deploy-backup.py`. Also redeployed prox1 to sync script and modules from repo.
+
+---
 
 ### Module filename/function name mismatch
 **Added:** 2026-02-28
