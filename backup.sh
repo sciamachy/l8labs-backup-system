@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # /root/scripts/backup.sh
 # Fully modular backup script for any type of system

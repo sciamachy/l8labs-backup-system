@@ -82,6 +82,22 @@ The `--newer-mtime "1 day ago"` flag in `modules/openhab.sh` can produce empty t
 
 ---
 
+## Pending Verification
+
+### Confirm shebang fix resolves backup failures on all hosts
+**Added:** 2026-03-02
+**Verify after:** 2026-03-03 1:00 AM (next cron run)
+
+Blank line before shebang caused backups to run under dash instead of bash. Fix deployed to all 4 hosts on 2026-03-02. Need to confirm:
+- [ ] prox1: `host_status.json` shows `success` (was the host that reported the error)
+- [ ] podman-srv1: backup completed successfully
+- [ ] podman-db1: backup completed successfully
+- [ ] bas1: backup completed successfully
+
+**How to check:** Review `host_status.json` on each host's backup share, or check the monitoring stack for backup status after 1 AM.
+
+---
+
 ## Resolved Items
 
 ### All Linux hosts upgraded to v3.0.0
@@ -101,6 +117,16 @@ Three hosts (`bas1`, `podman-db1`, `podman-srv1`) were on v2.0.0 and vulnerable 
 Repo files `proxmox-pve.sh` and `proxmox-network.sh` didn't match their function names `backup_pve()` and `backup_network()`.
 
 **Resolution:** Renamed repo files back to `pve.sh` and `network.sh` to match what's deployed on prox1 and the function names.
+
+---
+
+### Blank line before shebang broke all host backups
+**Added:** 2026-03-02
+**Resolved:** 2026-03-02
+
+`backup.sh` had a blank line 1, pushing `#!/bin/bash` to line 2. The kernel didn't find the shebang, so cron ran the script under `/bin/sh` (dash on Debian). Dash can't handle bash arrays (`local arr=()`), causing `Syntax error: "(" unexpected` on prox1 and likely silent failures on other hosts.
+
+**Resolution:** Removed the blank line so the shebang is on line 1. Redeployed to all 4 hosts with `deploy-backup.py --script-only`.
 
 ---
 
