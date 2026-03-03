@@ -84,12 +84,12 @@ The `--newer-mtime "1 day ago"` flag in `modules/openhab.sh` can produce empty t
 
 ## Pending Verification
 
-### Confirm shebang fix resolves backup failures on all hosts
+### Confirm shebang + CRLF fixes resolve backup failures on all hosts
 **Added:** 2026-03-02
 **Verify after:** 2026-03-03 1:00 AM (next cron run)
 
-Blank line before shebang caused backups to run under dash instead of bash. Fix deployed to all 4 hosts on 2026-03-02. Need to confirm:
-- [ ] prox1: `host_status.json` shows `success` (was the host that reported the error)
+Two issues caused backup failures: blank line before shebang (ran under dash instead of bash) and CRLF line endings introduced by scp from Windows. Both fixed and redeployed to all hosts on 2026-03-03. Manual test on prox1 confirmed clean run. Need to confirm remaining hosts via cron:
+- [x] prox1: manual test run successful
 - [ ] podman-srv1: backup completed successfully
 - [ ] podman-db1: backup completed successfully
 - [ ] bas1: backup completed successfully
@@ -120,13 +120,15 @@ Repo files `proxmox-pve.sh` and `proxmox-network.sh` didn't match their function
 
 ---
 
-### Blank line before shebang broke all host backups
+### Blank line before shebang + CRLF line endings broke all host backups
 **Added:** 2026-03-02
-**Resolved:** 2026-03-02
+**Resolved:** 2026-03-03
 
-`backup.sh` had a blank line 1, pushing `#!/bin/bash` to line 2. The kernel didn't find the shebang, so cron ran the script under `/bin/sh` (dash on Debian). Dash can't handle bash arrays (`local arr=()`), causing `Syntax error: "(" unexpected` on prox1 and likely silent failures on other hosts.
+Two related issues from developing on Windows and deploying to Linux:
+1. Blank line 1 in `backup.sh` pushed `#!/bin/bash` to line 2 — kernel fell back to `/bin/sh` (dash), which can't handle bash arrays.
+2. `scp` from Windows introduced CRLF (`\r\n`) line endings in deployed modules, causing `\r': command not found` errors.
 
-**Resolution:** Removed the blank line so the shebang is on line 1. Redeployed to all 4 hosts with `deploy-backup.py --script-only`.
+**Resolution:** Removed blank line from `backup.sh`. Added CRLF stripping (`sed -i 's/\r$//'`) and shebang verification to `deploy-backup.py` so future deploys are safe. Redeployed all hosts. Manual test on prox1 confirmed clean run.
 
 ---
 

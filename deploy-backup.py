@@ -75,7 +75,11 @@ def maybe_sudo(host_cfg, command):
 
 
 def upload_file(key, host_cfg, local_path, remote_path, dry_run=False):
-    """Upload a file to a host, using sudo + temp file if needed."""
+    """Upload a file to a host, using sudo + temp file if needed.
+
+    After upload, strips any Windows CRLF line endings (\\r) from the
+    remote file to prevent bash syntax errors on Linux.
+    """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     if host_cfg["needs_sudo"]:
         tmp_path = f"/tmp/deploy_{os.path.basename(local_path)}_{timestamp}"
@@ -92,6 +96,15 @@ def upload_file(key, host_cfg, local_path, remote_path, dry_run=False):
         result = run(scp_cmd(key, local_path, host_cfg, remote_path), dry_run=dry_run)
         if not dry_run and result.returncode != 0:
             return False
+
+    # Strip Windows CRLF line endings that scp from Windows may introduce
+    run(
+        ssh_cmd(
+            key, host_cfg,
+            maybe_sudo(host_cfg, f"sed -i 's/\\r$//' {remote_path}"),
+        ),
+        dry_run=dry_run,
+    )
     return True
 
 
@@ -138,6 +151,20 @@ def deploy_script(key, name, host_cfg, dry_run=False):
 
     # Verify
     if not dry_run:
+        # Check shebang is on line 1
+        result = run(
+            ssh_cmd(
+                key, host_cfg,
+                maybe_sudo(host_cfg, f"head -1 {script_path}"),
+            ),
+            check=False,
+        )
+        if result.returncode != 0 or not result.stdout.strip().startswith("#!/bin/bash"):
+            print(f"  ERROR: Verification failed — shebang not on line 1")
+            return False
+        print(f"  VERIFIED: #!/bin/bash on line 1")
+
+        # Check key function exists
         result = run(
             ssh_cmd(
                 key, host_cfg,
