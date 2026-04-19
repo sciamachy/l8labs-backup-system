@@ -7,6 +7,7 @@
             "script_path": "/root/scripts/podman-backup.sh",
             "needs_sudo": false,
             "modules": [
+                "gitea",
                 "grafana",
                 "prometheus"
             ],

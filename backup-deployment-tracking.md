@@ -10,7 +10,7 @@ This document tracks which servers are running specific versions of the backup s
 |--------|---------|--------------|-------|
 | bas1.bas.l8labs.ca | v3.0.0 | 2026-03-01 | Upgraded from v2 via deploy-backup.py |
 | podman-db1.is.l8labs.ca | v3.0.0 | 2026-03-01 | Upgraded from v2 via deploy-backup.py |
-| podman-srv1.is.l8labs.ca | v3.0.0 | 2026-03-01 | Upgraded from v2 via deploy-backup.py |
+| podman-srv1.is.l8labs.ca | v3.0.0 | 2026-04-18 | Added `gitea` module (gitea dump → tar.gz) |
 | prox1.is.l8labs.ca | v3.0.0 | 2026-03-01 | Script + modules redeployed via deploy-backup.py |
 
 ### Windows (restic-based, separate approach)
